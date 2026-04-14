@@ -1,0 +1,19 @@
+# 컴파일 및 빌드 결과물
+/build/
+/out/
+/target/
+*.class
+
+# 로그 및 임시 파일
+*.log
+.gradle/
+.idea/
+*.yml
+# 환경 설정 및 보안 (API 키, DB 정보 등 포함된 경우 필수)
+application.yml
+application.properties
+*.sh
+
+# OS 관련
+.DS_Store
+Thumbs.db

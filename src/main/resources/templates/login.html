@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>Demo</title>
+
+    <!-- bootstrap만 유지 (선택) -->
+    <link rel="stylesheet" href="/webjars/bootstrap/css/bootstrap.min.css"/>
+</head>
+<body>
+<h1>Demo</h1>
+
+<div class="container unauthenticated">
+    With Naver: <<a href="/oauth2/authorization/naver">네이버 로그인</a>>
+</div>
+
+<div class="container authenticated" style="display:none">
+    Logged in as: <span id="user"></span>
+    <div>
+        <button onclick="logout()"class="btn btn-primary">로그아웃</button>
+        <button onclick="refreshToken()" class="btn btn-primary">로그인 연장</button>
+    </div>
+</div>
+
+<script>
+    // 페이지 로드 시 실행
+    window.onload = async function () {
+        try {
+            const response = await fetch("/api/user/me", {
+                method: "GET",
+                credentials: "include"
+            });
+
+            if (!response.ok) return;
+
+            const data = await response.json();
+            console.log(data);
+            console.log(data.name);
+            console.log(data.roles);
+
+            // 네이버는 response 안에 데이터 있음
+            const user = data.response?.name || data.name;
+
+            if (user) {
+                document.querySelector(".unauthenticated").style.display = "none";
+                document.querySelector(".authenticated").style.display = "block";
+                document.getElementById("user").innerText = user;
+            }
+
+        } catch (error) {
+            console.error("로그인 상태 확인 실패:", error);
+        }
+    };
+    const logout = async function() {
+        try {
+            const response = await fetch("/api/user/logout", {
+                method: "GET",
+                credentials: "include"
+            });
+            if(response.ok){
+                document.querySelector(".unauthenticated").style.display = "block";
+                document.querySelector(".authenticated").style.display = "none";
+                window.location.href ="/";
+            }
+        }catch(error){
+            console.error("로그아웃 실패:",error);
+        }
+    };
+</script>
+</body>
+</html>

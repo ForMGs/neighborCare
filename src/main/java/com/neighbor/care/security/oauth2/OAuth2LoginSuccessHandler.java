@@ -1,0 +1,65 @@
+package com.neighbor.care.security.oauth2;
+
+import com.neighbor.care.auth.jwt.JwtUtil;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+@Component
+@RequiredArgsConstructor
+public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+
+    private final JwtUtil jwtUtil;
+    private final ObjectMapper objectMapper;
+
+    @Override
+    public void onAuthenticationSuccess(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Authentication authentication
+    ) throws IOException {
+        System.out.println("======= OAuth2LoginSuccessHandler. =======");
+
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+
+        Long localUserId = ((Number) oAuth2User.getAttributes().get("localUserId")).longValue();
+        String role = (String) oAuth2User.getAttributes().get("localRole");
+        String name = (String) oAuth2User.getAttributes().get("userName");
+        System.out.println("name = " + name);
+
+        String accessToken = jwtUtil.createAccessToken(localUserId, role , name);
+        String refreshToken = jwtUtil.createRefreshToken(localUserId);
+
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+                        .httpOnly(true)
+                        .secure(false)
+                        .path("/")
+                        .maxAge(60 * 30)
+                        .sameSite("Lax")
+                        .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
+                        .httpOnly(true)
+                        .secure(false)
+                        .path("/api/auth/refresh")
+                        .maxAge(60 * 60*24*7)
+                        .sameSite("Lax")
+                        .build();
+        response.addHeader("Set-Cookie",accessCookie.toString());
+        response.addHeader("Set-Cookie",refreshCookie.toString());
+
+        response.sendRedirect("http://localhost:8080/");
+        clearAuthenticationAttributes(request);
+    }
+}
