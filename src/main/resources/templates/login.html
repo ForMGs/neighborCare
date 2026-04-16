@@ -13,6 +13,9 @@
 <div class="container unauthenticated">
     With Naver: <<a href="/oauth2/authorization/naver">네이버 로그인</a>>
 </div>
+<div class="container unauthenticated">
+    With Kakao: <<a href="/oauth2/authorization/kakao">카카오 로그인</a>>
+</div>
 
 <div class="container authenticated" style="display:none">
     Logged in as: <span id="user"></span>
@@ -51,6 +54,19 @@
             console.error("로그인 상태 확인 실패:", error);
         }
     };
+    const refreshToken = async function(){
+        try{
+            const response = await fetch("/api/auth/refresh",{
+                method: "GET",
+                credentials: "include"
+            });
+            if(response.ok){
+                alert("ok");
+            }
+        }catch(error){
+            console.log("error : "+ error);
+        }
+    }
     const logout = async function() {
         try {
             const response = await fetch("/api/user/logout", {

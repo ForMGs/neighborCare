@@ -18,6 +18,7 @@ public class NaverUserInfo {
     public NaverUserInfo(Map<String, Object> attributes){
         Map<String, Object> response = (Map<String, Object>)attributes.get("response");
 
+        System.out.println("user info _ : " + response);
         if(response == null){
             throw new IllegalArgumentException("네이버 OAuth2 response 값이 없습니다.");
         }

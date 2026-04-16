@@ -41,13 +41,14 @@ public class SocialApplication {
                 .requestMatchers("/","/error","/webjars/**").permitAll()
                         .requestMatchers("/api/user/naver",
                                 "/api/user/me",
-                                "/api/user/logout").permitAll()
+                                "/api/user/logout",
+                                "/api/auth/refresh").permitAll()
                         .requestMatchers("/h2-console/**","/favicon.ico","/h2-console").permitAll()
                 .anyRequest().authenticated()
         ).exceptionHandling(e -> e
                 .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
         ).sessionManagement(s->s
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .oauth2Login(
                 oauth2 -> oauth2
                         .userInfoEndpoint( userInfo -> userInfo
