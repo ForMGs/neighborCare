@@ -76,7 +76,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     customAttributes,
                     "id"
             );
-/// //
         }else if("kakao".equals(registrationId)){
             System.out.println("kakao access_token으로 가져온 정보 : \n"+ oAuth2User.getAttributes().toString());
             KakaoUserInfo kakaoUserInfo = new KakaoUserInfo(oAuth2User.getAttributes());
