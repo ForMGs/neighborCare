@@ -43,13 +43,15 @@ public class JwtUtil {
                 .compact();
     }
 
-    public String createRefreshToken(Long userId){
+    public String createRefreshToken(Long userId , String role, String name){
         Date now = new Date();
         Date expiry = new Date(now.getTime() + refreshTokenExpiration);
 
         return Jwts.builder()
                 .subject(String.valueOf(userId))
                 .issuedAt(now)
+                .claim("role",role)
+                .claim("name",name)
                 .expiration(expiry)
                 .signWith(secretKey)
                 .compact();

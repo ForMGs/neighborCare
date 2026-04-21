@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -22,11 +23,13 @@ public class TokenController {
     private final JwtUtil jwtUtil;
 
     @RequestMapping("/refresh")
-    public ResponseEntity<Void> refreshToken(
+    public ResponseEntity<String> refreshToken(
             HttpServletRequest request,
-            HttpServletResponse response
+            HttpServletResponse response,
+            Authentication authentication
     ){
         String refreshToken = extractCookie(request, "refreshToken");
+        System.out.println("authentication : " + authentication.getPrincipal());
         if(refreshToken == null || refreshToken.isBlank()){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -39,6 +42,7 @@ public class TokenController {
             String role = claims.get("role", String.class);
             String name = claims.get("name",String.class);
             System.out.println("name = " + name);
+            System.out.println("role = "+ role);
 
             String newAccessToken = jwtUtil.createAccessToken(userId, role,name);
 
@@ -51,7 +55,7 @@ public class TokenController {
                     .build();
             response.addHeader("Set-Cookie",accessCookie.toString());
             System.out.println("refresh 완료 : "+ newAccessToken);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok(role);
         }catch (Exception e){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }

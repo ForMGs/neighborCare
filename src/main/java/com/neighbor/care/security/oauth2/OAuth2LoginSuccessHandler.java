@@ -30,16 +30,16 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             Authentication authentication
     ) throws IOException {
         System.out.println("======= OAuth2LoginSuccessHandler. =======");
-
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-
+        System.out.println(oAuth2User.toString());
+        System.out.println(oAuth2User.getAttributes());
         Long localUserId = ((Number) oAuth2User.getAttributes().get("localUserId")).longValue();
         String role = (String) oAuth2User.getAttributes().get("localRole");
         String name = (String) oAuth2User.getAttributes().get("userName");
         System.out.println("name = " + name);
 
         String accessToken = jwtUtil.createAccessToken(localUserId, role , name);
-        String refreshToken = jwtUtil.createRefreshToken(localUserId);
+        String refreshToken = jwtUtil.createRefreshToken(localUserId , role,name);
 
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
                         .httpOnly(true)
@@ -58,7 +58,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                         .build();
         response.addHeader("Set-Cookie",accessCookie.toString());
         response.addHeader("Set-Cookie",refreshCookie.toString());
-
+        System.out.println("redirect url : "+request.getParameter("state"));
         response.sendRedirect("http://localhost:8080/");
         clearAuthenticationAttributes(request);
     }

@@ -7,6 +7,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,12 +30,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain) throws ServletException, IOException
     {
         System.out.println("======= JwtAuthenticationFilter. =======");
+        HttpSession session = request.getSession(false);
+        if(session !=null){
+            System.out.println("session = "+ session.getId());
+
+        }else{
+            System.out.println("session null");
+        }
+        System.out.println("RequestedSessionId = "+ request.getRequestedSessionId());
 
 
         String token = resolveToken(request);
+        System.out.println("token : "+token );
         try{
             Claims claims = jwtParser.parseSignedClaims(token).getPayload();
-
+            System.out.println("claims : " + claims);
             Long userId = Long.valueOf(claims.getSubject());
             String role = claims.get("role", String.class);
 
@@ -52,7 +62,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             principal.getAuthorities()
                     );
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
+            System.out.println("filter 내부 : " + authentication);
         }catch (Exception ignored){}
         filterChain.doFilter(request,response);
     }

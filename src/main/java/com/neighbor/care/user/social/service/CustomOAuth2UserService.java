@@ -2,6 +2,7 @@ package com.neighbor.care.user.social.service;
 
 import com.neighbor.care.user.entity.User;
 import com.neighbor.care.user.repo.UserJpaRepository;
+import com.neighbor.care.user.social.google.GoogleUserInfo;
 import com.neighbor.care.user.social.kakao.KakaoUserInfo;
 import com.neighbor.care.user.social.naver.NaverUserInfo;
 import lombok.RequiredArgsConstructor;
@@ -30,12 +31,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest)throws OAuth2AuthenticationException {
         System.out.println("======= CustomOAuth2UserService 생성. =======");
-        System.out.println("userRequest = " + userRequest.getAdditionalParameters());
-        System.out.println("userRequest = " + userRequest.getClientRegistration());
+        System.out.println("[1]userRequest = " + userRequest.getAccessToken().getTokenValue());
+        System.out.println("[2]userRequest = " + userRequest.getAdditionalParameters());
+        System.out.println("[3]userRequest = " + userRequest.getClientRegistration());
 
         OAuth2User oAuth2User = super.loadUser(userRequest);
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
-        System.out.println(userRequest.getClientRegistration());
         System.out.println("registrationId : " +registrationId );
 
         if(!"naver".equals(registrationId) && !"kakao".equals(registrationId)){

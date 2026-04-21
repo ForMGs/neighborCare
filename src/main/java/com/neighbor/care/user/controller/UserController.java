@@ -42,7 +42,11 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> selectMe(Authentication authentication){
+
         System.out.println("여기" + authentication);
+        if(authentication != null){
+            System.out.println("출철 : "+authentication.getClass());
+        }
         Map<String, Object> outDTO = new HashMap<>();
         if(authentication != null && authentication.isAuthenticated()){
             outDTO.put("name",authentication.getName());

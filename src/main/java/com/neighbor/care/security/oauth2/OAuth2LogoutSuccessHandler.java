@@ -2,6 +2,7 @@ package com.neighbor.care.security.oauth2;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.Response;
 import org.springframework.http.ResponseCookie;
@@ -39,8 +40,20 @@ public class OAuth2LogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
                 .maxAge(0)
                 .build();
 
+        ResponseCookie jsessionCookie = ResponseCookie.from("JSESSIONID","")
+                        .httpOnly(true)
+                        .secure(false)
+                        .maxAge(0)
+                        .path("/")
+                        .build();
         response.addHeader("Set-Cookie",accessCookie.toString());
         response.addHeader("Set-Cookie",refreshCookie.toString());
+        response.addHeader("Set-Cookie",jsessionCookie.toString());
+
+        HttpSession session = request.getSession(false);
+        if(session != null){
+            session.invalidate();
+        }
         response.setStatus(HttpServletResponse.SC_OK);
     }
 }

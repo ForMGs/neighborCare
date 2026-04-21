@@ -16,7 +16,10 @@
 <div class="container unauthenticated">
     With Kakao: <<a href="/oauth2/authorization/kakao">카카오 로그인</a>>
 </div>
-
+<div class="container unauthenticated">
+    With Kakao: <<a href="/oauth2/authorization/google">Google 로그인</a>>
+</div>
+<div class="g-signin2" data-onsuccess="onSignIn"></div>
 <div class="container authenticated" style="display:none">
     Logged in as: <span id="user"></span>
     <div>
@@ -24,7 +27,7 @@
         <button onclick="refreshToken()" class="btn btn-primary">로그인 연장</button>
     </div>
 </div>
-
+<script src="https://apis.google.com/js/platform.js" async defer></script>
 <script>
     // 페이지 로드 시 실행
     window.onload = async function () {
@@ -61,7 +64,13 @@
                 credentials: "include"
             });
             if(response.ok){
-                alert("ok");
+                console.log("response");
+                localStorage.setItem('role',response);
+            }
+            if(response == "GUARDIAN"){
+                document.querySelector(".unauthenticated").style.display = "block";
+                document.querySelector(".authenticated").style.display = "none";
+                window.location.href ="/";
             }
         }catch(error){
             console.log("error : "+ error);
@@ -77,6 +86,7 @@
                 document.querySelector(".unauthenticated").style.display = "block";
                 document.querySelector(".authenticated").style.display = "none";
                 window.location.href ="/";
+
             }
         }catch(error){
             console.error("로그아웃 실패:",error);

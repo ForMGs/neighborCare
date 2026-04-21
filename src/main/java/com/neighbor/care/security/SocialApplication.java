@@ -4,6 +4,8 @@ import com.neighbor.care.auth.filter.JwtAuthenticationFilter;
 import com.neighbor.care.security.cors.CorsConfig;
 import com.neighbor.care.security.oauth2.OAuth2LoginSuccessHandler;
 import com.neighbor.care.security.oauth2.OAuth2LogoutSuccessHandler;
+import com.neighbor.care.session.filter.SessionDebugFilter;
+import com.neighbor.care.user.social.service.CustomOAuth1UserService;
 import com.neighbor.care.user.social.service.CustomOAuth2UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -26,9 +28,13 @@ public class SocialApplication {
 
     //...
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomOAuth1UserService customOAuth1UserService;
+
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final OAuth2LogoutSuccessHandler logoutSuccessHandler;
+    private final SessionDebugFilter sessionDebugFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
@@ -48,30 +54,32 @@ public class SocialApplication {
         ).exceptionHandling(e -> e
                 .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
         ).sessionManagement(s->s
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2Login(
                 oauth2 -> oauth2
                         .userInfoEndpoint( userInfo -> userInfo
-                                .userService(customOAuth2UserService))
+                                .userService(customOAuth2UserService)
+                                .oidcUserService(customOAuth1UserService))
                         .successHandler(oAuth2LoginSuccessHandler)
                         .failureHandler((request, response, exception) -> {
                             System.out.println("blocked path ="+ request.getRequestURI());
                             System.out.println(exception);
-                            request.getSession().setAttribute("error.message", exception.getMessage());
+                            request.getSession(false).setAttribute("error.message", exception.getMessage());
                         })
         ).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout ->logout
                         .logoutUrl("/api/user/logout")
                         .logoutSuccessHandler(logoutSuccessHandler)
-                .permitAll());
+                .permitAll())
+                .addFilterBefore(sessionDebugFilter , UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     @GetMapping("/error")
     public String error(HttpServletRequest request){
-        String message = (String) request.getSession().getAttribute("error.message");
-        request.getSession().removeAttribute("error.message");
+        String message = (String) request.getSession(false).getAttribute("error.message");
+        request.getSession(false).removeAttribute("error.message");
         return message;
     }
 }
