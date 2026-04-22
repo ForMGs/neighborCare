@@ -45,10 +45,10 @@ public class SocialApplication {
                         .frameOptions(frame -> frame.sameOrigin()))
                 .authorizeHttpRequests(a->a
                 .requestMatchers("/","/error","/webjars/**").permitAll()
-                        .requestMatchers("/api/user/naver",
+                        .requestMatchers(
                                 "/api/user/me",
                                 "/api/user/logout",
-                                "/api/auth/refresh").permitAll()
+                                "/api/auth/refresh").authenticated()
                         .requestMatchers("/h2-console/**","/favicon.ico","/h2-console").permitAll()
                 .anyRequest().authenticated()
         ).exceptionHandling(e -> e

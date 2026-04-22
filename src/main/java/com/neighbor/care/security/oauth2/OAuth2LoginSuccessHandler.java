@@ -1,27 +1,26 @@
 package com.neighbor.care.security.oauth2;
 
 import com.neighbor.care.auth.jwt.JwtUtil;
+import com.neighbor.care.redis.service.RedisTokenCycleSvc;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import tools.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
-
+    @Value("${jwt.refresh-token-expiration}")
+    private long refreshTokenExpiration;
     private final JwtUtil jwtUtil;
-    private final ObjectMapper objectMapper;
+    private final RedisTokenCycleSvc redisTokenCycleSvc;
 
     @Override
     public void onAuthenticationSuccess(
@@ -29,6 +28,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             HttpServletResponse response,
             Authentication authentication
     ) throws IOException {
+
         System.out.println("======= OAuth2LoginSuccessHandler. =======");
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
         System.out.println(oAuth2User.toString());
@@ -48,6 +48,13 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                         .maxAge(60 * 30)
                         .sameSite("Lax")
                         .build();
+        //Redis[start]
+        System.out.println("localUserId :"+localUserId);
+        System.out.println("refreshToken : "+ refreshToken);
+        System.out.println("refreshTokenExpiration = " + refreshTokenExpiration);
+        redisTokenCycleSvc.save(localUserId, refreshToken , refreshTokenExpiration);
+        //Redis[end]
+
 
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                         .httpOnly(true)

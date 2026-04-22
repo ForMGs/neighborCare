@@ -1,5 +1,9 @@
 package com.neighbor.care.security.oauth2;
 
+import com.neighbor.care.redis.service.RedisTokenCycleSvc;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtParser;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -13,6 +17,8 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class OAuth2LogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
+    private final RedisTokenCycleSvc redisTokenCycleSvc;
+    private final JwtParser jwtParser;
 
     @Override
     public void onLogoutSuccess(HttpServletRequest request,
@@ -22,6 +28,23 @@ public class OAuth2LogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler {
         if(authentication != null){
             String userId = authentication.getName();
             System.out.println("userId" + userId);
+        }
+        String refreshToken = "";
+        if(request.getCookies() != null){
+            System.out.println("쿠키가. ..");
+            for(Cookie cookie : request.getCookies()){
+                System.out.println(cookie.getName());
+                if("accessToken".equals(cookie.getName())){
+                    refreshToken =  cookie.getValue();
+                }
+            }
+        }
+        Claims claims = jwtParser.parseSignedClaims(refreshToken).getPayload();
+        Long userId = Long.valueOf(claims.getSubject());
+
+        String byUserId = redisTokenCycleSvc.findByUserId(userId);
+        if(byUserId != null){
+            redisTokenCycleSvc.deleteByUserId(userId);
         }
 
         ResponseCookie accessCookie = ResponseCookie.from("accessToken","")

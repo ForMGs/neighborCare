@@ -1,5 +1,6 @@
 package com.neighbor.care.user.controller;
 
+import com.neighbor.care.user.dto.CustomUserDetails;
 import com.neighbor.care.user.dto.UserInDTO;
 import com.neighbor.care.user.service.UserServiceInterface;
 import lombok.RequiredArgsConstructor;
@@ -46,11 +47,15 @@ public class UserController {
         System.out.println("여기" + authentication);
         if(authentication != null){
             System.out.println("출철 : "+authentication.getClass());
+
+            System.out.println("authentication = " + authentication.getPrincipal());
         }
+        CustomUserDetails user = (CustomUserDetails)authentication.getPrincipal();
+
         Map<String, Object> outDTO = new HashMap<>();
-        if(authentication != null && authentication.isAuthenticated()){
-            outDTO.put("name",authentication.getName());
-            outDTO.put("roles", authentication.getAuthorities());
+        if(authentication.isAuthenticated()){
+            outDTO.put("name",user.getName());
+            outDTO.put("roles", user.getAuthorities());
             System.out.println(authentication);
         }
         return ResponseEntity.ok(outDTO);

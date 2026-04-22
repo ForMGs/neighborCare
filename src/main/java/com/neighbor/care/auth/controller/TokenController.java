@@ -1,6 +1,7 @@
 package com.neighbor.care.auth.controller;
 
 import com.neighbor.care.auth.jwt.JwtUtil;
+import com.neighbor.care.redis.service.RedisTokenCycleSvc;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import jakarta.servlet.http.Cookie;
@@ -19,17 +20,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/api/auth")
 public class TokenController {
 
+    private final RedisTokenCycleSvc redisTokenCycleSvc;
     private final JwtParser jwtParser;
     private final JwtUtil jwtUtil;
 
     @RequestMapping("/refresh")
     public ResponseEntity<String> refreshToken(
             HttpServletRequest request,
-            HttpServletResponse response,
-            Authentication authentication
+            HttpServletResponse response
+//            Authentication authentication
     ){
         String refreshToken = extractCookie(request, "refreshToken");
-        System.out.println("authentication : " + authentication.getPrincipal());
+//        System.out.println("authentication : " + authentication.getPrincipal());
         if(refreshToken == null || refreshToken.isBlank()){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -43,6 +45,11 @@ public class TokenController {
             String name = claims.get("name",String.class);
             System.out.println("name = " + name);
             System.out.println("role = "+ role);
+
+            if(!redisTokenCycleSvc.matches(userId,refreshToken)){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Refresh token mismatch");
+            }
+
 
             String newAccessToken = jwtUtil.createAccessToken(userId, role,name);
 

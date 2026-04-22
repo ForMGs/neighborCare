@@ -1,5 +1,6 @@
 package com.neighbor.care.auth.filter;
 
+import com.neighbor.care.user.dto.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import jakarta.servlet.FilterChain;
@@ -29,6 +30,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException
     {
+        if(!request.getRequestURI().startsWith("/api/auth")
+                && !request.getRequestURI().startsWith("/api/user/me")
+                && !request.getRequestURI().startsWith("/api/user/logout")){
+            SecurityContextHolder.clearContext();
+            filterChain.doFilter(request,response);
+            return;
+        }
         System.out.println("======= JwtAuthenticationFilter. =======");
         HttpSession session = request.getSession(false);
         if(session !=null){
@@ -42,19 +50,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = resolveToken(request);
         System.out.println("token : "+token );
+
+        if(token == null){
+            SecurityContextHolder.clearContext();
+        }
+
         try{
             Claims claims = jwtParser.parseSignedClaims(token).getPayload();
             System.out.println("claims : " + claims);
             Long userId = Long.valueOf(claims.getSubject());
+            String name = claims.get("name", String.class);
             String role = claims.get("role", String.class);
 
-            UserDetails principal = org.springframework.security.core.userdetails.User
-                    .withUsername(String.valueOf(userId))
-                    .password("")
-                    .username(claims.get("name",String.class))
-                    .authorities(role)
-                    .build();
-
+            CustomUserDetails principal = new CustomUserDetails(userId,name, role);
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
                             principal,
@@ -63,7 +71,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     );
             SecurityContextHolder.getContext().setAuthentication(authentication);
             System.out.println("filter 내부 : " + authentication);
-        }catch (Exception ignored){}
+        }catch (Exception e){
+            SecurityContextHolder.clearContext();
+        }
         filterChain.doFilter(request,response);
     }
 

@@ -3,95 +3,133 @@
 <head>
     <meta charset="utf-8"/>
     <title>Demo</title>
-
-    <!-- bootstrap만 유지 (선택) -->
     <link rel="stylesheet" href="/webjars/bootstrap/css/bootstrap.min.css"/>
 </head>
 <body>
 <h1>Demo</h1>
 
 <div class="container unauthenticated">
-    With Naver: <<a href="/oauth2/authorization/naver">네이버 로그인</a>>
+    With Naver: <a href="/oauth2/authorization/naver">네이버 로그인</a>
 </div>
 <div class="container unauthenticated">
-    With Kakao: <<a href="/oauth2/authorization/kakao">카카오 로그인</a>>
+    With Kakao: <a href="/oauth2/authorization/kakao">카카오 로그인</a>
 </div>
 <div class="container unauthenticated">
-    With Kakao: <<a href="/oauth2/authorization/google">Google 로그인</a>>
+    With Google: <a href="/oauth2/authorization/google">Google 로그인</a>
 </div>
-<div class="g-signin2" data-onsuccess="onSignIn"></div>
+
 <div class="container authenticated" style="display:none">
     Logged in as: <span id="user"></span>
     <div>
-        <button onclick="logout()"class="btn btn-primary">로그아웃</button>
+        <button onclick="logout()" class="btn btn-primary">로그아웃</button>
         <button onclick="refreshToken()" class="btn btn-primary">로그인 연장</button>
     </div>
 </div>
-<script src="https://apis.google.com/js/platform.js" async defer></script>
-<script>
-    // 페이지 로드 시 실행
-    window.onload = async function () {
-        try {
-            const response = await fetch("/api/user/me", {
-                method: "GET",
-                credentials: "include"
-            });
 
-            if (!response.ok) return;
+<script>
+    function showAuthenticated(userName) {
+        document.querySelectorAll(".unauthenticated").forEach(el => {
+            el.style.display = "none";
+        });
+        document.querySelector(".authenticated").style.display = "block";
+        document.getElementById("user").innerText = userName;
+    }
+
+    function showUnauthenticated() {
+        document.querySelectorAll(".unauthenticated").forEach(el => {
+            el.style.display = "block";
+        });
+        document.querySelector(".authenticated").style.display = "none";
+        document.getElementById("user").innerText = "";
+    }
+
+    async function getMe() {
+        return await fetch("/api/user/me", {
+            method: "GET",
+            credentials: "include"
+        });
+    }
+
+    async function tryRefresh() {
+        return await fetch("/api/auth/refresh", {
+            method: "GET",
+            credentials: "include"
+        });
+    }
+
+    async function loadUser() {
+        try {
+            let response = await getMe();
+            console.log(response);
+            if (response.status === 401) {
+                const refreshResponse = await tryRefresh();
+
+                if (!refreshResponse.ok) {
+                    showUnauthenticated();
+                    return;
+                }
+
+                response = await getMe();
+            }
+
+            if (!response.ok) {
+                showUnauthenticated();
+                return;
+            }
 
             const data = await response.json();
-            console.log(data);
-            console.log(data.name);
-            console.log(data.roles);
+            console.log("me =", data);
 
-            // 네이버는 response 안에 데이터 있음
-            const user = data.response?.name || data.name;
-
-            if (user) {
-                document.querySelector(".unauthenticated").style.display = "none";
-                document.querySelector(".authenticated").style.display = "block";
-                document.getElementById("user").innerText = user;
-            }
+            const user = data.response?.name || data.name || "사용자";
+            showAuthenticated(user);
 
         } catch (error) {
             console.error("로그인 상태 확인 실패:", error);
+            showUnauthenticated();
         }
+    }
+
+    window.onload = async function () {
+        await loadUser();
     };
-    const refreshToken = async function(){
-        try{
-            const response = await fetch("/api/auth/refresh",{
+
+    async function refreshToken() {
+        try {
+            const response = await fetch("/api/auth/refresh", {
                 method: "GET",
                 credentials: "include"
             });
-            if(response.ok){
-                console.log("response");
-                localStorage.setItem('role',response);
+
+            if (!response.ok) {
+                showUnauthenticated();
+                window.location.href = "/";
+                return;
             }
-            if(response == "GUARDIAN"){
-                document.querySelector(".unauthenticated").style.display = "block";
-                document.querySelector(".authenticated").style.display = "none";
-                window.location.href ="/";
-            }
-        }catch(error){
-            console.log("error : "+ error);
+
+            // refresh 성공 후 사용자 정보 다시 조회
+            await loadUser();
+
+        } catch (error) {
+            console.error("refresh 실패:", error);
+            showUnauthenticated();
         }
     }
-    const logout = async function() {
+
+    async function logout() {
         try {
             const response = await fetch("/api/user/logout", {
                 method: "GET",
                 credentials: "include"
             });
-            if(response.ok){
-                document.querySelector(".unauthenticated").style.display = "block";
-                document.querySelector(".authenticated").style.display = "none";
-                window.location.href ="/";
 
+            if (response.ok) {
+                showUnauthenticated();
+                window.location.href = "/";
             }
-        }catch(error){
-            console.error("로그아웃 실패:",error);
+        } catch (error) {
+            console.error("로그아웃 실패:", error);
         }
-    };
+    }
 </script>
 </body>
 </html>
