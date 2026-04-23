@@ -44,7 +44,7 @@ public class SocialApplication {
                 .headers(headers->headers
                         .frameOptions(frame -> frame.sameOrigin()))
                 .authorizeHttpRequests(a->a
-                .requestMatchers("/","/error","/webjars/**").permitAll()
+                .requestMatchers("/","/error","/webjars/**","/css/**").permitAll()
                         .requestMatchers(
                                 "/api/user/me",
                                 "/api/user/logout",

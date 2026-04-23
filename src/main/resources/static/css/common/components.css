@@ -1,0 +1,34 @@
+.card {
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    padding: 36px 28px;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+}
+
+.btn {
+    width: 100%;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 13px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary-custom {
+    background: linear-gradient(135deg, var(--color-primary), #6366f1);
+    color: white;
+}
+
+.btn-light-custom {
+    background: var(--color-light-btn);
+    color: var(--color-light-btn-text);
+}

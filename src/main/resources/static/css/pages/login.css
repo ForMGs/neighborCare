@@ -1,0 +1,121 @@
+.login-card {
+    overflow: hidden;
+}
+
+.login-title {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.login-badge {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 14px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--color-primary), #7c3aed);
+    color: white;
+    font-size: 22px;
+    font-weight: 700;
+    box-shadow: 0 12px 24px rgba(79, 70, 229, 0.25);
+}
+
+.login-title h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.login-title p {
+    margin: 8px 0 0;
+    font-size: 14px;
+    color: var(--color-muted);
+}
+
+.social-list {
+    display: grid;
+    gap: 12px;
+}
+
+.social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    padding: 14px 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border);
+    background: white;
+    color: #0f172a;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.social-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+    color: #0f172a;
+}
+
+.naver-btn {
+    border-left: 6px solid var(--color-naver);
+}
+
+.kakao-btn {
+    background: #fee500;
+    color: #181600;
+    border-left: 6px solid #4285f4;
+}
+
+.google-btn {
+    border-left: 6px solid #4285f4;
+}
+
+.authenticated {
+    text-align: center;
+}
+
+.welcome-box {
+    margin-bottom: 18px;
+    padding: 20px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, #eef2ff, #f5f3ff);
+    border: 1px solid #e0e7ff;
+}
+
+.welcome-label {
+    font-size: 13px;
+    color: var(--color-muted);
+    margin-bottom: 6px;
+}
+
+.welcome-user {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111827;
+    word-break: break-word;
+}
+
+.action-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 576px) {
+    .card {
+        background: white;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.15);
+    }
+
+    .login-title h1 {
+        font-size: 24px;
+    }
+
+    .action-group {
+        grid-template-columns: 1fr;
+    }
+}

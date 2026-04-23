@@ -1,28 +1,50 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="utf-8"/>
     <title>Demo</title>
-    <link rel="stylesheet" href="/webjars/bootstrap/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/webjars/bootstrap/5.3.3/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/common/variables.css"/>
+    <link rel="stylesheet" href="/css/common/layout.css"/>
+    <link rel="stylesheet" href="/css/common/components.css"/>
+    <link rel="stylesheet" href="/css/pages/login.css"/>
 </head>
 <body>
-<h1>Demo</h1>
+<div class="page-center">
+    <div class="container-box">
+        <div class="card login-card">
+            <div class="login-title">
+                <div class="login-badge">N</div>
+                <h1>Social Login</h1>
+                <p>간편하게 로그인하세요</p>
+            </div>
 
-<div class="container unauthenticated">
-    With Naver: <a href="/oauth2/authorization/naver">네이버 로그인</a>
-</div>
-<div class="container unauthenticated">
-    With Kakao: <a href="/oauth2/authorization/kakao">카카오 로그인</a>
-</div>
-<div class="container unauthenticated">
-    With Google: <a href="/oauth2/authorization/google">Google 로그인</a>
-</div>
+            <div class="unauthenticated">
+                <div class="social-list">
+                    <a class="social-btn naver-btn">
+                        <span>K</span> 네이버 로그인
+                    </a>
+                    <a class="social-btn kakao-btn">
+                        <span>K</span> 카카오 로그인
+                    </a>
+                    <a class="social-btn google-btn">
+                        <span>K</span> 구글 로그인
+                    </a>
+                </div>
+            </div>
 
-<div class="container authenticated" style="display:none">
-    Logged in as: <span id="user"></span>
-    <div>
-        <button onclick="logout()" class="btn btn-primary">로그아웃</button>
-        <button onclick="refreshToken()" class="btn btn-primary">로그인 연장</button>
+            <div class="authenticated" style="display:none">
+                <div class="welcome-box">
+                    <div class="welcome-label">Logged in as</div>
+                    <div class="welcome-user"><span id="user"></span></div>
+                </div>
+
+                <div class="action-group">
+                    <button onclick="refreshToken()" class="btn btn-primary-custom">로그인 연장</button>
+                    <button onclick="logout()" class="btn btn-light-custom">로그아웃</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -61,6 +83,7 @@
         try {
             let response = await getMe();
             console.log(response);
+
             if (response.status === 401) {
                 const refreshResponse = await tryRefresh();
 
@@ -106,7 +129,6 @@
                 return;
             }
 
-            // refresh 성공 후 사용자 정보 다시 조회
             await loadUser();
 
         } catch (error) {
